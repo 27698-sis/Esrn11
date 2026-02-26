@@ -1,0 +1,38 @@
+name: Compilar APK ESRN 11
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar APK
+        working-directory: android-app
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Publicar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "ESRN 11 · Versión ${{ github.run_number }}"
+          body: |
+            ## 📱 App ESRN 11 — Diseño Curricular
+            1. Descargá el archivo APK
+            2. Abrilo en el celular
+            3. Si pide permiso, activá "Instalar apps desconocidas"
+            4. ¡Listo!
+          files: android-app/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
